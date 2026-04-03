@@ -4,16 +4,17 @@
     the game's features.
 */
 
-
 // These are all the symbols that the game is going to use
-const symbols = ['🍎', '🍌', '🍇', '🍓', '🍍', '🍉', '🍒', '🥝'];
+const symbols = ["🍎", "🍌", "🍇", "🍓", "🍍", "🍉", "🍒", "🥝"];
 // You're going to need this to display the cards on the screen (remember there should be two of each card)
 let cards = [];
 // These will be used when the user starts choosing cards
-let firstCard = null, secondCard = null;
+let firstCard = null,
+  secondCard = null;
 // You will need to lock the board to stop users from choosing cards when they choose two wrong cards
 // (Don't have to worry about this too much)
 let lockBoard = false;
+const CardDiv = document.getElementById("game-board");
 
 /* 
     You must initialize the game board. You have been given a shuffleArray() function.
@@ -22,9 +23,21 @@ let lockBoard = false;
 
 */
 function initGame() {
-    // Write your code here
+  CardDiv.innerHTML = "";
+  cards =[];
+  shuffleArray(symbols);
+  let doublesymbol = [...symbols];
+  shuffleArray(symbols);
+  for (let i = 0; i < symbols.length; i++) {
+    doublesymbol.push(symbols[i]);
+  }
+  for (let i = 0; i < doublesymbol.length; i++) {
+    createCard(doublesymbol[i]);
+  }
+  for (let i =0 ; i<cards.length; i++ ) {
+    CardDiv.appendChild(cards[i]);
+  }
 
-    document.getElementById('restart-btn').addEventListener('click', initGame);
 }
 
 /*
@@ -34,7 +47,14 @@ function initGame() {
     Also make sure to add the event listener with the 'flipCard' function
 */
 function createCard(symbol) {
-    // Write your code here
+  
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.symbol = symbol;
+    card.textContent = "";
+    card.addEventListener("click", () => flipCard(card));
+    cards.push(card);
+  
 }
 
 /*
@@ -46,9 +66,22 @@ function createCard(symbol) {
     want to check for a match using the checkForMatch() function. 
 */
 function flipCard(card) {
-    // If the board is supposed to be locked or you picked the same card you already picked
-    if (lockBoard || card === firstCard) return;
-    // Write your code here
+  // If the board is supposed to be locked or you picked the same card you already picked
+  if (lockBoard || card === firstCard) return;
+  // Write your code here
+      card.classList.add("flipped"); 
+      card.textContent = card.dataset.symbol;
+      if (!firstCard) {
+    firstCard = card;
+  } else {
+    secondCard = card;
+    lockBoard = true;
+    checkForMatch();
+  }
+      
+  
+
+
 }
 
 /* 
@@ -57,7 +90,12 @@ function flipCard(card) {
     Otherwise, you should unflip the card and continue playing normally.
 */
 function checkForMatch() {
-    // Write your code here
+  if (firstCard.dataset.symbol == secondCard.dataset.symbol) {
+    disableCards();
+  }else {
+    unflipCards();
+  }
+
 }
 
 /* 
@@ -66,37 +104,42 @@ function checkForMatch() {
     to reset the firstCard, secondCard, and lockBoard variables. (That's been written for you already)
 */
 function disableCards() {
-    // Write your code here
+firstCard.classList.remove("flipped");
+secondCard.classList.remove("flipped");
+  firstCard.classList.add("matched");
+  secondCard.classList.add("matched");
+   resetBoard();
 }
- 
+
+document.getElementById("restart-btn").addEventListener("click", initGame);
+
 /* ---------------------  Everything under has already been done for you -------------------------- */
 
 function unflipCards() {
+  // We lock the board so that the user can't touch the board while it is unflipping
+  lockBoard = true;
 
-    // We lock the board so that the user can't touch the board while it is unflipping
-    lockBoard = true;
-
-    // The cards will be flipped back after 1 second and the board will be reset
-    // The 1 second is to give the user time to actaully see the card so they can memorize them before they unflip
-    setTimeout(() => {
-        firstCard.classList.remove('flipped');
-        secondCard.classList.remove('flipped');
-        firstCard.textContent = '';
-        secondCard.textContent = '';
-        resetBoard();
-    }, 1000);
+  // The cards will be flipped back after 1 second and the board will be reset
+  // The 1 second is to give the user time to actaully see the card so they can memorize them before they unflip
+  setTimeout(() => {
+    firstCard.classList.remove("flipped");
+    secondCard.classList.remove("flipped");
+    firstCard.textContent = "";
+    secondCard.textContent = "";
+    resetBoard();
+  }, 1000);
 }
 
 function resetBoard() {
-    [firstCard, secondCard, lockBoard] = [null, null, false];
+  [firstCard, secondCard, lockBoard] = [null, null, false];
 }
 
 // Function to shuffle an array
 function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
 }
 
 initGame();
